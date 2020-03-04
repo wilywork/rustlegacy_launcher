@@ -1,1 +1,2 @@
-# rustlegacy_laucher
+# RustBusterLauncher
+RustBusterLauncher made by not me
