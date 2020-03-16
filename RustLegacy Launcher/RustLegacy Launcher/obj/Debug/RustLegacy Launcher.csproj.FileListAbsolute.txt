@@ -1,0 +1,14 @@
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\bin\Debug\RustLegacy Launcher.exe.config
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\bin\Debug\RustLegacy Launcher.exe
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\bin\Debug\RustLegacy Launcher.pdb
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy Launcher.csprojAssemblyReference.cache
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\MainWindow.g.cs
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\App.g.cs
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy Launcher_MarkupCompile.cache
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy Launcher_MarkupCompile.lref
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\MainWindow.baml
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy Launcher.g.resources
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy_Launcher.Properties.Resources.resources
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy Launcher.csproj.GenerateResource.cache
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy Launcher.exe
+C:\projetos\rustlegacy_laucher\RustLegacy Launcher\RustLegacy Launcher\obj\Debug\RustLegacy Launcher.pdb

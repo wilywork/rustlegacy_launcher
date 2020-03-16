@@ -1,0 +1,8 @@
+
+*.lock
+RustLegacy Launcher/bin/*
+RustLegacy Launcher/obj/*
+RustLegacy Launcher/.vs/RustLegacy Launcher/v16/.suo
+*.ide
+*.ide-shm
+*.ide-wal
