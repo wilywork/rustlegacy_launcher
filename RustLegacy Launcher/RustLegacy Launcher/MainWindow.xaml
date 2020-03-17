@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RustLegacy_Launcher"
         mc:Ignorable="d"
-        Title="MainWindow" Height="395.2" Width="686.8"  ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Icon="66d8dba3bfb615969b316dc971b51238.png" Background="White">
+        Title="RustLegacy Launcher" Height="395.2" Width="686.8"  ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Icon="66d8dba3bfb615969b316dc971b51238.png" Background="White">
 
     <Window.Resources>
         <Style x:Key="Estilo_Placeholder" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -41,20 +41,21 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="0,0,-0.6,0.4">
-        <Grid HorizontalAlignment="Left" Height="366" Margin="205,0,-2,-3.2" VerticalAlignment="Top" Width="484">
+    <Grid Margin="1,0,-1,0.6">
+        <Grid HorizontalAlignment="Left" Height="366" Margin="205,0,-0.4,-0.8" VerticalAlignment="Top" Width="476">
             <Grid.Background>
                 <ImageBrush ImageSource="17855063_273356053089839_6175626704372017601_o.jpg" Stretch="UniformToFill"/>
             </Grid.Background>
         </Grid>
-        <Grid HorizontalAlignment="Left" Height="366" VerticalAlignment="Top" Width="205">
+        <Grid HorizontalAlignment="Left" Height="362" VerticalAlignment="Top" Width="200" Margin="5,0,0,0">
             <Grid Margin="10,161,10,157">
-                <TextBox HorizontalAlignment="Left" Height="29" TextWrapping="Wrap" Tag="Your Nick Here" Text="" VerticalAlignment="Top" Width="170" Padding="20,1,0,0" Margin="7,10,0,0"/>
-                <Image HorizontalAlignment="Left" Height="17" VerticalAlignment="Bottom" Width="18" Source="icon_user.png" Margin="12,0,0,16.4" RenderTransformOrigin="1.4,1.959"/>
+                <TextBox HorizontalAlignment="Left" Height="29" TextWrapping="Wrap" Tag="Your Nick Here" Text="" VerticalAlignment="Top" Width="170" Padding="24,5,0,0" Margin="7,10,0,0"/>
+                <Image HorizontalAlignment="Left" Height="17" VerticalAlignment="Bottom" Width="18" Source="icon_user.png" Margin="12,0,0,11.6" RenderTransformOrigin="1.4,1.959"/>
             </Grid>
-            <Button Content="Jogar" HorizontalAlignment="Left" Margin="47,231,0,0" VerticalAlignment="Top" Width="100" Height="34"/>
-            <Image HorizontalAlignment="Left" Height="47" Margin="9,56,0,0" VerticalAlignment="Top" Width="186" Source="logo.png" RenderTransformOrigin="0.234,0.774">
+            <Button Content="Jogar" HorizontalAlignment="Left" Margin="50,234,0,0" VerticalAlignment="Top" Width="100" Height="34"/>
+            <Image HorizontalAlignment="Left" Height="36" Margin="20,50,0,0" VerticalAlignment="Top" Width="158" Source="logo.png" RenderTransformOrigin="0.234,0.774">
             </Image>
+            <Label x:Name="label_version" Content="v0.0.0" HorizontalAlignment="Left" Margin="154,334,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.496,-0.202" Background="{x:Null}" Foreground="#FFC78802" FontWeight="Bold" FontSize="10"/>
         </Grid>
     </Grid>
 </Window>

@@ -6,3 +6,5 @@ RustLegacy Launcher/.vs/RustLegacy Launcher/v16/.suo
 *.ide
 *.ide-shm
 *.ide-wal
+RustLegacy Launcher/RustLegacy Launcher/bin/*
+RustLegacy Launcher/RustLegacy Launcher/obj/*
