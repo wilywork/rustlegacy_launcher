@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -63,6 +66,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="extensions\IniParser.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -86,6 +90,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -95,28 +100,31 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="FZNmuqgtDnaYsiN-800x450-noPad.jpg" />
+    <Resource Include="imagens\FZNmuqgtDnaYsiN-800x450-noPad.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="66d8dba3bfb615969b316dc971b51238.png" />
+    <Resource Include="imagens\66d8dba3bfb615969b316dc971b51238.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="rust_2461082.jpg" />
+    <Resource Include="imagens\rust_2461082.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="rustpng-e9800a.png" />
+    <Resource Include="imagens\rustpng-e9800a.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="icon_user.png" />
+    <Resource Include="imagens\icon_user.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="logo.png" />
+    <Resource Include="imagens\logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="imagens\17855063_273356053089839_6175626704372017601_o.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="imagens\ScreenSelector.bmp" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="17855063_273356053089839_6175626704372017601_o.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="ScreenSelector.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
