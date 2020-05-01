@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+
 namespace RustLegacy_Launcher
 {
     /// <summary>
@@ -72,6 +73,11 @@ namespace RustLegacy_Launcher
 
 
         //=======================funcoes==========================
+        public void verificarArquivosDoJogo()
+        {
+
+           // GitClone(ICakeContext, string, DirectoryPath)
+        }
         public Process[] checkRustGameOpen(bool closeGame)
         {
             Process[] processesByName = Process.GetProcessesByName("rust");
