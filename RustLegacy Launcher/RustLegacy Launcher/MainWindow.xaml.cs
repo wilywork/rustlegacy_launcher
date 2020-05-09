@@ -26,7 +26,7 @@ namespace RustLegacy_Launcher
     public partial class MainWindow : Window
     {
 
-        public static string version = "0.0.0";
+        public static string version = "1.0.0";
 
         public static string newVersion = "";
 
@@ -50,8 +50,14 @@ namespace RustLegacy_Launcher
             if (verificarSeTemAttDoLauncher())
             {
                 infoProgress.Content = "Baixando novo launcher...";
-                baixarNovoLauncher();
-            }
+                System.Threading.Thread threadCheckUpdate = new System.Threading.Thread(() => {
+                    System.Threading.Thread.Sleep(2000);
+                    requestServerDownload(String.Concat(urlLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion), "exe", Directory.GetCurrentDirectory());
+                    Process.Start(String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe")));
+                    uninstall();
+                });
+                threadCheckUpdate.Start();
+        }
             else
             {
                 infoProgress.Content = "";
@@ -234,17 +240,6 @@ namespace RustLegacy_Launcher
                     processesByName[i].Kill();
                 }
             }
-        }
-        public void baixarNovoLauncher()
-        {
-            //Thread threadCheckUpdate = new Thread(() =>
-            //{
-                string newLauncher = String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe"));
-                requestServerDownload(String.Concat(urlLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion), "exe", Directory.GetCurrentDirectory());
-                Process.Start(newLauncher);
-                uninstall();
-            //});
-            //threadCheckUpdate.Start();
         }
         //bypass
         [DllImport("kernel32.dll")]
