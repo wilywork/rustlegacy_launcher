@@ -7,7 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -34,8 +36,12 @@ namespace RustLegacy_Launcher
 
         public static string fileLumaEmu = string.Concat(Directory.GetCurrentDirectory(), "\\LumaEmu.ini");
 
-        public string urlLauncherCheckUpdate = "https://rustlegacy.github.io/launcher/";
+        public static string urlLauncherCheckUpdate = "https://rustlegacy.github.io/";
 
+        public static string pathLauncherCheckUpdate = "launcher/";
+        public static string pathClientCheckUpdate = "client/";
+
+        public static string pathClientFiles = "\\rust_Data\\Managed\\";
 
 
         public MainWindow()
@@ -47,23 +53,35 @@ namespace RustLegacy_Launcher
             infoProgress.Content = "Verificando versão...";
             btn_playGame.IsEnabled = false;
 
-            if (verificarSeTemAttDoLauncher())
+
+            Thread thread = new Thread(() =>
             {
-                infoProgress.Content = "Baixando novo launcher...";
-                System.Threading.Thread threadCheckUpdate = new System.Threading.Thread(() => {
-                    System.Threading.Thread.Sleep(2000);
-                    requestServerDownload(String.Concat(urlLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion), "exe", Directory.GetCurrentDirectory());
-                    Process.Start(String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe")));
-                    uninstall();
-                });
-                threadCheckUpdate.Start();
-        }
-            else
-            {
-                infoProgress.Content = "";
-                //verificar arquivos do jogo
-                btn_playGame.IsEnabled = true;
-            }
+                Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    if (verificarSeTemAttDoLauncher())
+                    {
+                        infoProgress.Content = "Baixando novo launcher...";
+                        System.Threading.Thread threadCheckUpdate = new System.Threading.Thread(() => {
+                            System.Threading.Thread.Sleep(2000);
+                            requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion), "exe", Directory.GetCurrentDirectory());
+                            Process.Start(String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe")));
+                            uninstall();
+                        });
+                        threadCheckUpdate.Start();
+                    }
+                    else
+                    {
+                        infoProgress.Content = "Verificando arquivos...";
+                        verificarArquivosDoJogo();
+                        infoProgress.Content = "";
+                        //verificar arquivos do jogo
+                        btn_playGame.IsEnabled = true;
+                    }
+
+                }));
+            });
+            thread.Start();
+
 
         }
 
@@ -97,9 +115,22 @@ namespace RustLegacy_Launcher
 
 
         //=======================classes==========================
-        public class infoLauncher
+        public class InfoLauncher
         {
             public string version;
+        }
+        public class InfoFilesClient
+        {
+            public string version;
+
+            public Dictionary<string, string> files;
+
+            public InfoFilesClient(string _version, Dictionary<string, string> _files)
+            {
+                this.version = _version;
+                this.files = _files;
+            }
+
         }
 
         //=======================funcoes==========================
@@ -111,9 +142,18 @@ namespace RustLegacy_Launcher
                 return client.DownloadString(url);
             }
         }
-        public void requestServerDownload(string url, string fileName, string extension, string folder)
+        public static void requestServerDownload(string url, string fileName, string extension, string folder)
         {
-            string filePath = String.Concat(folder, "\\", fileName, ".", extension);
+            string filePath;
+
+            if (extension != null)
+            {
+                filePath = String.Concat(folder, "\\", fileName, ".", extension);
+                fileName = String.Format(fileName, ".", extension);
+            } else
+            {
+                filePath = String.Concat(folder, fileName);
+            }
 
             if (File.Exists(filePath))
             {
@@ -125,12 +165,12 @@ namespace RustLegacy_Launcher
             using (WebClient client = new WebClient())
             {
                 System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
-                client.DownloadFile(String.Concat(url, fileName, ".", extension), String.Concat(folder, "\\", fileName, ".", extension));
+                client.DownloadFile(String.Concat(url, fileName), filePath);
             }
         }
         public bool verificarSeTemAttDoLauncher()
         {
-            infoLauncher info = JsonHelper.Deserialize<infoLauncher>(requestServer(String.Concat(urlLauncherCheckUpdate, "version.json")));
+            InfoLauncher info = JsonHelper.Deserialize<InfoLauncher>(requestServer(String.Concat(urlLauncherCheckUpdate, pathLauncherCheckUpdate, "version.json")));
             if (info != null)
             {
                 newVersion = info.version;
@@ -152,8 +192,34 @@ namespace RustLegacy_Launcher
         }
         public void verificarArquivosDoJogo()
         {
-
-            // GitClone(ICakeContext, string, DirectoryPath)
+            //string request = requestServer(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "manifest.json"));
+            InfoFilesClient info = JsonHelper.Deserialize<InfoFilesClient>(requestServer(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "manifest.json")));
+            if (info != null)
+            {
+                if (info.files != null && info.files.Count > 0)
+                {
+                    try
+                    {
+                        foreach (KeyValuePair<string, string> file in info.files)
+                        {
+                            string filePath = String.Concat(Directory.GetCurrentDirectory(), pathClientFiles, file.Key);
+                            if (File.Exists(filePath))
+                            {
+                                string hashCheck = Hash(filePath);
+                                if (hashCheck != file.Value)
+                                {
+                                    infoProgress.Content = "Baixando " + file.Key + "...";
+                                    requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, null, String.Concat(Directory.GetCurrentDirectory(), pathClientFiles));
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Erro ao Verificar arquivos do jogo.", "Error");
+                    }
+                }
+            }
         }
         public Process[] checkRustGameOpen(bool closeGame)
         {
@@ -230,7 +296,7 @@ namespace RustLegacy_Launcher
 
             Process.GetCurrentProcess().Kill();
         }
-        public void closeProcessOpen(string process)
+        public static void closeProcessOpen(string process)
         {
             Process[] processesByName = Process.GetProcessesByName(process);
             if (processesByName.Length != 0)
@@ -241,6 +307,21 @@ namespace RustLegacy_Launcher
                 }
             }
         }
+
+        public static string Hash(string stringToHash)
+        {
+            //var stream = new BufferedStream(File.OpenRead(stringToHash), 100000);
+
+            using (var stream = new BufferedStream(File.OpenRead(stringToHash), 100000))
+            {
+                using (var sha1 = new SHA1Managed())
+                {
+                    return BitConverter.ToString(sha1.ComputeHash(stream)).Replace("-", string.Empty);
+                }
+            }
+
+        }
+
         //bypass
         [DllImport("kernel32.dll")]
         public static extern IntPtr GetModuleHandle(string running);
