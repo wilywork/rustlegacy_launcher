@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Resources;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -6,12 +7,12 @@ using System.Windows;
 // conjunto de atributos. Altere estes valores de atributo para modificar as informações
 // associada a um assembly.
 [assembly: AssemblyTitle("RustLegacy Launcher")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("RustLegacy Launcher um novo Cliente para o jogo.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("RustLegacy")]
 [assembly: AssemblyProduct("RustLegacy Launcher")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("RustLegacy")]
 [assembly: AssemblyCulture("")]
 
 // Definir ComVisible como false torna os tipos neste assembly invisíveis
@@ -51,3 +52,5 @@ using System.Windows;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: NeutralResourcesLanguage("pt-BR")]
+[assembly: Guid("543B46AE-0609-45CD-91E1-146AF73F08EE")]

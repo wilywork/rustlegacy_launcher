@@ -4,21 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Reflection;
+using System.Security.Principal;
+
 
 namespace RustLegacy_Launcher
 {
@@ -47,12 +40,12 @@ namespace RustLegacy_Launcher
         public MainWindow()
         {
             InitializeComponent();
+            AdminRelauncher();
             textbox_nick.Text = getNameThePlayer();
             label_version.Content = "v" + version;
 
             infoProgress.Content = "Verificando versão...";
             btn_playGame.IsEnabled = false;
-
 
             Thread thread = new Thread(() =>
             {
@@ -61,13 +54,9 @@ namespace RustLegacy_Launcher
                     if (verificarSeTemAttDoLauncher())
                     {
                         infoProgress.Content = "Baixando novo launcher...";
-                        System.Threading.Thread threadCheckUpdate = new System.Threading.Thread(() => {
-                            System.Threading.Thread.Sleep(2000);
-                            requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion), "exe", Directory.GetCurrentDirectory());
-                            Process.Start(String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe")));
-                            uninstall();
-                        });
-                        threadCheckUpdate.Start();
+                        requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion), "exe", Directory.GetCurrentDirectory());
+                        Process.Start(String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe")));
+                        uninstall();
                     }
                     else
                     {
@@ -77,9 +66,9 @@ namespace RustLegacy_Launcher
                         //verificar arquivos do jogo
                         btn_playGame.IsEnabled = true;
                     }
-
                 }));
             });
+
             thread.Start();
 
 
@@ -88,7 +77,7 @@ namespace RustLegacy_Launcher
         //======================components========================
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            System.Windows.Controls.ComboBoxItem curItem = ((System.Windows.Controls.ComboBoxItem)(sender as ComboBox).SelectedValue);
+            ComboBoxItem curItem = ((ComboBoxItem)(sender as ComboBox).SelectedValue);
             languageActive = curItem.Name;
             //    UpdateNamesComponents();
         }
@@ -138,7 +127,7 @@ namespace RustLegacy_Launcher
         {
             using (WebClient client = new WebClient())
             {
-                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 return client.DownloadString(url);
             }
         }
@@ -150,7 +139,8 @@ namespace RustLegacy_Launcher
             {
                 filePath = String.Concat(folder, "\\", fileName, ".", extension);
                 fileName = String.Format(fileName, ".", extension);
-            } else
+            }
+            else
             {
                 filePath = String.Concat(folder, fileName);
             }
@@ -158,13 +148,13 @@ namespace RustLegacy_Launcher
             if (File.Exists(filePath))
             {
                 closeProcessOpen(fileName);
-                System.Threading.Thread.Sleep(400);
+                Thread.Sleep(400);
                 File.Delete(filePath);
             }
 
             using (WebClient client = new WebClient())
             {
-                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 client.DownloadFile(String.Concat(url, fileName), filePath);
             }
         }
@@ -211,6 +201,10 @@ namespace RustLegacy_Launcher
                                     infoProgress.Content = "Baixando " + file.Key + "...";
                                     requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, null, String.Concat(Directory.GetCurrentDirectory(), pathClientFiles));
                                 }
+                            } else
+                            {
+                                infoProgress.Content = "Baixando " + file.Key + "...";
+                                requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, null, String.Concat(Directory.GetCurrentDirectory(), pathClientFiles));
                             }
                         }
                     }
@@ -310,8 +304,6 @@ namespace RustLegacy_Launcher
 
         public static string Hash(string stringToHash)
         {
-            //var stream = new BufferedStream(File.OpenRead(stringToHash), 100000);
-
             using (var stream = new BufferedStream(File.OpenRead(stringToHash), 100000))
             {
                 using (var sha1 = new SHA1Managed())
@@ -322,23 +314,59 @@ namespace RustLegacy_Launcher
 
         }
 
-        //bypass
-        [DllImport("kernel32.dll")]
-        public static extern IntPtr GetModuleHandle(string running);
-        public static void Running()
+        private void AdminRelauncher()
         {
-            while (true)
+            if (!IsRunAsAdmin())
             {
-                if (GetModuleHandle("SbieDll.dll").ToInt32() != 0 || GetModuleHandle("Snxhk.dll").ToInt32() != 0)
+                ProcessStartInfo proc = new ProcessStartInfo();
+                proc.UseShellExecute = true;
+                proc.WorkingDirectory = Environment.CurrentDirectory;
+                proc.FileName = Assembly.GetEntryAssembly().CodeBase;
+
+                proc.Verb = "runas";
+
+                try
                 {
-                    System.Threading.Thread.Sleep(17000);
+                    Process.Start(proc);
+                    Application.Current.Shutdown();
                 }
-                else
+                catch (Exception ex)
                 {
-                    break;
+                    Console.WriteLine("This program must be run as an administrator! \n\n" + ex.ToString());
                 }
             }
         }
+
+        private bool IsRunAsAdmin()
+        {
+            try
+            {
+                WindowsIdentity id = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(id);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        ////bypass
+        //[DllImport("kernel32.dll")]
+        //public static extern IntPtr GetModuleHandle(string running);
+        //public static void Running()
+        //{
+        //    while (true)
+        //    {
+        //        if (GetModuleHandle("SbieDll.dll").ToInt32() != 0 || GetModuleHandle("Snxhk.dll").ToInt32() != 0)
+        //        {
+        //            System.Threading.Thread.Sleep(17000);
+        //        }
+        //        else
+        //        {
+        //            break;
+        //        }
+        //    }
+        //}
 
     }
 }
