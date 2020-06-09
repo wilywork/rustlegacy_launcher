@@ -11,7 +11,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Reflection;
 using System.Security.Principal;
-
+using System.Runtime.InteropServices;
+using System.Linq;
+using System.ComponentModel;
 
 namespace RustLegacy_Launcher
 {
@@ -21,7 +23,7 @@ namespace RustLegacy_Launcher
     public partial class MainWindow : Window
     {
 
-        public static string version = "1.0.0";
+        public static string version = "1.0.1";
 
         public static string newVersion = "";
 
@@ -36,6 +38,9 @@ namespace RustLegacy_Launcher
 
         public static string pathClientFiles = "\\rust_Data\\Managed\\";
 
+        public static bool falhaAoVerificarArquivos = false;
+
+        public Dictionary<string, string> listFilesToDownload = new Dictionary<string, string>();
 
         public MainWindow()
         {
@@ -47,29 +52,15 @@ namespace RustLegacy_Launcher
             infoProgress.Content = "Verificando versão...";
             btn_playGame.IsEnabled = false;
 
-            Thread thread = new Thread(() =>
-            {
-                Dispatcher.BeginInvoke((Action)(() =>
-                {
-                    if (verificarSeTemAttDoLauncher())
-                    {
-                        infoProgress.Content = "Baixando novo launcher...";
-                        requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion), "exe", Directory.GetCurrentDirectory());
-                        Process.Start(String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe")));
-                        uninstall();
-                    }
-                    else
-                    {
-                        infoProgress.Content = "Verificando arquivos...";
-                        verificarArquivosDoJogo();
-                        infoProgress.Content = "";
-                        //verificar arquivos do jogo
-                        btn_playGame.IsEnabled = true;
-                    }
-                }));
-            });
+            //Thread thread = new Thread(() =>
+            //{
+            //    Dispatcher.BeginInvoke((Action)(() =>
+            //    {
+                    InitStartCheck();
+            //    }));
+            //});
 
-            thread.Start();
+            //thread.Start();
 
 
         }
@@ -123,6 +114,30 @@ namespace RustLegacy_Launcher
         }
 
         //=======================funcoes==========================
+        public void InitStartCheck()
+        {
+            if (verificarSeTemAttDoLauncher())
+            {
+                infoProgress.Content = "Baixando novo launcher...";
+                requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathLauncherCheckUpdate, "files/"), String.Concat("rust-launcher_v", newVersion, ".exe"), Directory.GetCurrentDirectory());
+                Process.Start(String.Concat(Directory.GetCurrentDirectory(), "\\", String.Concat("rust-launcher_v", newVersion, ".exe")));
+                uninstall();
+            }
+            else
+            {
+                infoProgress.Content = "Verificando arquivos...";
+
+                verificarArquivosDoJogo();
+
+            }
+        }
+        public void habilitarGame()
+        {
+            infoProgress.Content = "";
+            infoProgressFiles.Content = "";
+            //verificar arquivos do jogo
+            btn_playGame.IsEnabled = true;
+        }
         public string requestServer(string url)
         {
             using (WebClient client = new WebClient())
@@ -131,32 +146,68 @@ namespace RustLegacy_Launcher
                 return client.DownloadString(url);
             }
         }
-        public static void requestServerDownload(string url, string fileName, string extension, string folder)
+        public void requestServerDownload(string url, string fileName, string folder)
         {
-            string filePath;
+            infoProgressFiles.Content = "Baixando " + fileName + "...";
 
-            if (extension != null)
+            string fileNameLocal = fileName.Replace("/", "\\");
+
+            if (File.Exists(fileNameLocal))
             {
-                filePath = String.Concat(folder, "\\", fileName, ".", extension);
-                fileName = String.Format(fileName, ".", extension);
-            }
-            else
-            {
-                filePath = String.Concat(folder, fileName);
+                try
+                {
+                    closeProcessOpen(fileNameLocal);
+                    Thread.Sleep(400);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                File.Delete(fileNameLocal);
             }
 
-            if (File.Exists(filePath))
+            try
             {
-                closeProcessOpen(fileName);
-                Thread.Sleep(400);
-                File.Delete(filePath);
+                createFolder(fileNameLocal);
+            }
+            catch (Exception)
+            {
             }
 
-            using (WebClient client = new WebClient())
+            try
             {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                client.DownloadFile(String.Concat(url, fileName), filePath);
+                using (System.Net.WebClient client = new System.Net.WebClient())
+                {
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                    client.Headers.Add("user-agent", string.Concat("rand", (new Random()).Next(0, 999999)));
+                    //client.DownloadFile(String.Concat(url, fileName), fileNameLocal);
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
+                    client.DownloadFileAsync(new Uri(String.Concat(url, fileName)), fileNameLocal);
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao baixar arquivo " + fileName + " \n" + ex, "Error");
+                falhaAoVerificarArquivos = true;
+            }
+
+        }
+
+        void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                // handle error scenario
+              //  MessageBox.Show(translator("download_error_antivirus"), "Error");
+                MessageBox.Show(e.Error.ToString(), "Error");
+                throw e.Error;
+            }
+            if (e.Cancelled)
+            {
+                // handle cancelled scenario
+            }
+
+            downloadInProgress();
         }
         public bool verificarSeTemAttDoLauncher()
         {
@@ -183,38 +234,74 @@ namespace RustLegacy_Launcher
         public void verificarArquivosDoJogo()
         {
             //string request = requestServer(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "manifest.json"));
-            InfoFilesClient info = JsonHelper.Deserialize<InfoFilesClient>(requestServer(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "manifest.json")));
+            InfoFilesClient info = JsonHelper.Deserialize<InfoFilesClient>(requestServer(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "manifestFiles.json")));
             if (info != null)
             {
                 if (info.files != null && info.files.Count > 0)
                 {
                     try
                     {
-                        foreach (KeyValuePair<string, string> file in info.files)
-                        {
-                            string filePath = String.Concat(Directory.GetCurrentDirectory(), pathClientFiles, file.Key);
-                            if (File.Exists(filePath))
-                            {
-                                string hashCheck = Hash(filePath);
-                                if (hashCheck != file.Value)
-                                {
-                                    infoProgress.Content = "Baixando " + file.Key + "...";
-                                    requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, null, String.Concat(Directory.GetCurrentDirectory(), pathClientFiles));
-                                }
-                            } else
-                            {
-                                infoProgress.Content = "Baixando " + file.Key + "...";
-                                requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, null, String.Concat(Directory.GetCurrentDirectory(), pathClientFiles));
-                            }
-                        }
+                        listFilesToDownload = info.files;
+                        downloadInProgress();
+                        //foreach (KeyValuePair<string, string> file in info.files)
+                        //{
+                        //    if (falhaAoVerificarArquivos) break;
+                        //    string filePath = String.Concat(Directory.GetCurrentDirectory(), file.Key.Replace("/", "\\"));
+                        //    if (File.Exists(filePath))
+                        //    {
+                        //        string hashCheck = Hash(filePath);
+                        //        if (hashCheck != file.Value)
+                        //        {
+
+                        //            requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, Directory.GetCurrentDirectory());
+                        //        }
+                        //    } else
+                        //    {
+                        //        requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, Directory.GetCurrentDirectory());
+                        //    }
+                        //}
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        MessageBox.Show("Erro ao Verificar arquivos do jogo.", "Error");
+                        MessageBox.Show("Erro ao Verificar arquivos do jogo. \n" + ex, "Error");
                     }
                 }
             }
         }
+
+        public void downloadInProgress()
+        {
+            if (listFilesToDownload != null && listFilesToDownload.Count > 0)
+            {
+                var file = listFilesToDownload.First();
+
+                listFilesToDownload.Remove(file.Key);
+
+                infoProgressFiles.Content = "Verificando " + file.Key + "...";
+
+                string filePath = String.Concat(Directory.GetCurrentDirectory(), "\\", file.Key.Replace("/", "\\"));
+                if (File.Exists(filePath))
+                {
+                    string hashFile = Hash(filePath);
+                    if (hashFile != file.Value)
+                    {
+                        requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, Directory.GetCurrentDirectory());
+                    } else
+                    {
+                        downloadInProgress();
+                    }
+                }
+                else
+                {
+                    requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, Directory.GetCurrentDirectory());
+                }
+
+            } else
+            {
+                habilitarGame();
+            }
+        }
+
         public Process[] checkRustGameOpen(bool closeGame)
         {
             Process[] processesByName = Process.GetProcessesByName("rust");
@@ -337,6 +424,29 @@ namespace RustLegacy_Launcher
             }
         }
 
+        private  static void createFolder(string path)
+        {
+            //fix path
+            path = path.Replace("/", "\\");
+
+            path = Path.GetDirectoryName(path);
+
+            if (path != "")
+            {
+                try
+                {
+                    bool folderExists = Directory.Exists(path);
+                    if (!folderExists)
+                        Directory.CreateDirectory(path);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Erro ao criar Pasta. \n" + ex, "Error");
+                }
+            }
+
+        }
+
         private bool IsRunAsAdmin()
         {
             try
@@ -351,22 +461,22 @@ namespace RustLegacy_Launcher
             }
         }
         ////bypass
-        //[DllImport("kernel32.dll")]
-        //public static extern IntPtr GetModuleHandle(string running);
-        //public static void Running()
-        //{
-        //    while (true)
-        //    {
-        //        if (GetModuleHandle("SbieDll.dll").ToInt32() != 0 || GetModuleHandle("Snxhk.dll").ToInt32() != 0)
-        //        {
-        //            System.Threading.Thread.Sleep(17000);
-        //        }
-        //        else
-        //        {
-        //            break;
-        //        }
-        //    }
-        //}
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetModuleHandle(string running);
+        public static void Running()
+        {
+            while (true)
+            {
+                if (GetModuleHandle("SbieDll.dll").ToInt32() != 0 || GetModuleHandle("Snxhk.dll").ToInt32() != 0)
+                {
+                    System.Threading.Thread.Sleep(17000);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
 
     }
 }
