@@ -33,6 +33,8 @@ namespace RustLegacy_Launcher
 
         public static string urlLauncherCheckUpdate = "https://rustlegacy.github.io/";
 
+        public static string urlLauncherCheckUpdateBigFiles = "https://bitbucket.org/RustLegacy/rust-legacy-game/raw/e3cc06f4c43b885c251fb341da954aca66cf2321/";
+
         public static string pathLauncherCheckUpdate = "launcher/";
         public static string pathClientCheckUpdate = "client/";
 
@@ -42,25 +44,26 @@ namespace RustLegacy_Launcher
 
         public Dictionary<string, string> listFilesToDownload = new Dictionary<string, string>();
 
+        public static List<string> ignoreFilesCheck = new List<string>() { "LumaEmu.ini", "cfg/client.cfg" };
         public MainWindow()
         {
             InitializeComponent();
             AdminRelauncher();
-            textbox_nick.Text = getNameThePlayer();
+            
             label_version.Content = "v" + version;
 
             infoProgress.Content = "Verificando versão...";
             btn_playGame.IsEnabled = false;
 
-            //Thread thread = new Thread(() =>
-            //{
-            //    Dispatcher.BeginInvoke((Action)(() =>
-            //    {
+            Thread thread = new Thread(() =>
+            {
+                Dispatcher.BeginInvoke((Action)(() =>
+                {
                     InitStartCheck();
-            //    }));
-            //});
+                }));
+            });
 
-            //thread.Start();
+            thread.Start();
 
 
         }
@@ -135,6 +138,7 @@ namespace RustLegacy_Launcher
         {
             infoProgress.Content = "";
             infoProgressFiles.Content = "";
+            textbox_nick.Text = getNameThePlayer();
             //verificar arquivos do jogo
             btn_playGame.IsEnabled = true;
         }
@@ -174,6 +178,8 @@ namespace RustLegacy_Launcher
             {
             }
 
+            Uri urlFileDownload = new Uri(String.Concat(url, fileName));
+
             try
             {
                 using (System.Net.WebClient client = new System.Net.WebClient())
@@ -182,12 +188,12 @@ namespace RustLegacy_Launcher
                     client.Headers.Add("user-agent", string.Concat("rand", (new Random()).Next(0, 999999)));
                     //client.DownloadFile(String.Concat(url, fileName), fileNameLocal);
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
-                    client.DownloadFileAsync(new Uri(String.Concat(url, fileName)), fileNameLocal);
+                    client.DownloadFileAsync(urlFileDownload, fileNameLocal);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erro ao baixar arquivo " + fileName + " \n" + ex, "Error");
+                MessageBox.Show("Erro ao baixar arquivo " + fileName + " \n" + urlFileDownload + "\n" + ex, "Error");
                 falhaAoVerificarArquivos = true;
             }
 
@@ -277,15 +283,30 @@ namespace RustLegacy_Launcher
 
                 listFilesToDownload.Remove(file.Key);
 
-                infoProgressFiles.Content = "Verificando " + file.Key + "...";
+                string fileName = file.Key.Replace("BIG/", "");
+                string filePath = String.Concat(Directory.GetCurrentDirectory(), "\\", fileName.Replace("/", "\\"));
+                string urlFileForDownload = urlLauncherCheckUpdate;
 
-                string filePath = String.Concat(Directory.GetCurrentDirectory(), "\\", file.Key.Replace("/", "\\"));
+                infoProgressFiles.Content = "Verificando " + fileName + "...";
+
+                if (file.Key.StartsWith("BIG"))
+                {
+                    urlFileForDownload = urlLauncherCheckUpdateBigFiles;
+                }
+
                 if (File.Exists(filePath))
                 {
-                    string hashFile = Hash(filePath);
-                    if (hashFile != file.Value)
+                    if (!ignoreFilesCheck.Contains(fileName))
                     {
-                        requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, Directory.GetCurrentDirectory());
+                        string hashFile = Hash(filePath);
+                        if (hashFile != file.Value)
+                        {
+                            requestServerDownload(String.Concat(urlFileForDownload, pathClientCheckUpdate, "files/"), fileName, Directory.GetCurrentDirectory());
+                        }
+                        else
+                        {
+                            downloadInProgress();
+                        }
                     } else
                     {
                         downloadInProgress();
@@ -293,7 +314,7 @@ namespace RustLegacy_Launcher
                 }
                 else
                 {
-                    requestServerDownload(String.Concat(urlLauncherCheckUpdate, pathClientCheckUpdate, "files/"), file.Key, Directory.GetCurrentDirectory());
+                    requestServerDownload(String.Concat(urlFileForDownload, pathClientCheckUpdate, "files/"), fileName, Directory.GetCurrentDirectory());
                 }
 
             } else

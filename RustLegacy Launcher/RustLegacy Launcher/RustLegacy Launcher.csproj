@@ -17,20 +17,30 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
+    <UpdateRequired>true</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
+    <InstallUrl>http://rustlegacy.github.io/</InstallUrl>
+    <UpdateUrl>http://rustlegacy.github.io/</UpdateUrl>
+    <SupportUrl>http://rustlegacy.github.io</SupportUrl>
+    <ErrorReportUrl>http://rustlegacy.github.io</ErrorReportUrl>
+    <ProductName>RustLegacy Launcher</ProductName>
+    <PublisherName>RustLegacy</PublisherName>
+    <SuiteName>rustlegacylauncher</SuiteName>
+    <MinimumRequiredVersion>1.0.0.2</MinimumRequiredVersion>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
+    <UseApplicationTrust>true</UseApplicationTrust>
+    <CreateDesktopShortcut>true</CreateDesktopShortcut>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -65,23 +75,22 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>703A259DB8596B5A5CCFBF288BF7DA22A51A07A4</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>3183684ECB45CD8A1B14A75566ECE19B6D6A8C34</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
+    <ManifestKeyFile>RustLegacy Launcher_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>RustLegacy Launcher_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>rustlegacy.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <OutputPath>bin\x64\Debug\</OutputPath>
@@ -105,6 +114,9 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Costura, Version=4.1.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
@@ -179,22 +191,11 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="RustLegacy Launcher_TemporaryKey.pfx" />
+    <None Include="rustlegacy.pfx" />
     <None Include="rustlegacylauncher.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="imagens\FZNmuqgtDnaYsiN-800x450-noPad.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="imagens\66d8dba3bfb615969b316dc971b51238.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="imagens\rust_2461082.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="imagens\rustpng-e9800a.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="imagens\icon_user.png" />
@@ -203,13 +204,7 @@
     <Resource Include="imagens\logo.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="imagens\17855063_273356053089839_6175626704372017601_o.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="imagens\ScreenSelector.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="17855063_273356053089839_6175626704372017601_o.jpg" />
+    <Resource Include="imagens\background.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="imagens\icon.ico" />
